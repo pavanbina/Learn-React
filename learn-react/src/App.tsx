@@ -1,9 +1,21 @@
 import { useState } from 'react'
 import './App.css'
 
+type ContactFormState = {
+  name: string;
+  email: string;
+  message: string;
+  phones: string[];
+  gender: string;
+  country: string;
+  agree: boolean;
+  hobbies: string[];
+  otherCountry?: string;
+};
+
 function App() {
   // Arrays in state: phones (dynamic), hobbies (checkbox group)
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ContactFormState>({
     name: '',
     email: '',
     message: '',
@@ -44,14 +56,24 @@ function App() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type } = e.target;
+
     if (type === 'checkbox' && name === 'agree') {
-      setForm(prev => ({ ...prev, agree: checked }));
+      setForm(prev => ({ ...prev, agree: (e.target as HTMLInputElement).checked }));
     } else if (type === 'checkbox' && name === 'hobbies') {
       setForm(prev => {
-        const hobbies = prev.hobbies.includes(value)
-          ? prev.hobbies.filter((h: string) => h !== value)
-          : [...prev.hobbies, value];
+        const checked = (e.target as HTMLInputElement).checked;
+        const alreadySelected = prev.hobbies.includes(value);
+        let hobbies = prev.hobbies;
+
+        if (checked && !alreadySelected) {
+          hobbies = [...prev.hobbies, value];
+        }
+
+        if (!checked && alreadySelected) {
+          hobbies = prev.hobbies.filter((h: string) => h !== value);
+        }
+
         return { ...prev, hobbies };
       });
     } else {
